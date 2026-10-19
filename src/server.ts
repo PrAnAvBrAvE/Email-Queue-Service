@@ -1,37 +1,8 @@
-
 import "dotenv/config";
-
-import express from "express";
-import http from "node:http";
-import { ApolloServer } from "@apollo/server";
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { expressMiddleware } from "@as-integrations/express5";
-import cors from "cors";
-
-import { typeDefs } from "./graphql/type-defs.js";
-import { resolvers } from "./graphql/resolvers.js";
+import { createApp } from "./app.js";
 
 async function startServer(): Promise<void> {
-  const app = express();
-  const httpServer = http.createServer(app);
-
-  const graphqlServer = new ApolloServer({
-    typeDefs,
-    resolvers,
-    plugins: [
-      ApolloServerPluginDrainHttpServer({ httpServer }),
-    ],
-  });
-
-  await graphqlServer.start();
-
-  app.use(
-    "/graphql",
-    cors<cors.CorsRequest>(),
-    express.json(),
-    expressMiddleware(graphqlServer),
-  );
-
+  const { httpServer } = await createApp();
   const port = Number(process.env.PORT ?? 4000);
 
   await new Promise<void>((resolve) => {
